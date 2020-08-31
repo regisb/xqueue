@@ -1,12 +1,17 @@
 FROM ubuntu:xenial
 
 RUN apt update && \
-  apt install -qy git-core language-pack-en libmysqlclient-dev ntp libssl-dev python3.5 python3-pip python3.5-dev && \
-  pip3 install --upgrade pip setuptools && \
+  apt-get install -y software-properties-common && \
+  apt-add-repository -y ppa:deadsnakes/ppa && apt-get update && \
+  apt-get install -y curl && \
+  apt-get upgrade -qy && \
+  apt-get install git-core language-pack-en python3-pip libmysqlclient-dev ntp libssl-dev python3.8-dev python3.8-distutils -qy && \
+  curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+  python3.8 get-pip.py && python3.8 -m pip install --upgrade pip setuptools && \
   rm -rf /var/lib/apt/lists/*
 
-RUN ln -s /usr/bin/pip3 /usr/bin/pip
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN ln -s /usr/bin/python3.8/bin/pip /usr/bin/pip
+RUN ln -s /usr/bin/python3.8 /usr/bin/python
 
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
@@ -21,7 +26,7 @@ RUN chown app:app /edx/app/log/edx.log
 WORKDIR /edx/app/xqueue
 COPY requirements /edx/app/xqueue/requirements
 COPY requirements.txt /edx/app/xqueue/requirements.txt
-RUN pip install -r requirements.txt
+RUN python3.8 -m pip install -r requirements.txt
 
 USER app
 
